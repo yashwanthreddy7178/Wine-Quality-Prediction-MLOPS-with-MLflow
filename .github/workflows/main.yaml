@@ -77,14 +77,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to ECR
+        env:
+          ECR_PASSWORD: ${{ secrets.ECR_AUTHORIZATION_TOKEN }}
+        run: docker login -u AWS -p $ECR_PASSWORD ${{secrets.AWS_ECR_LOGIN_URI}}
+
       
       
       - name: Pull latest images
         run: |
-         docker pull ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+         docker pull ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:1
          
       # - name: Stop and remove container if running
       #   run: |
