@@ -53,7 +53,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
-          IMAGE_TAG: 1
+          IMAGE_TAG: latest
         run: |
           # Build a docker container and
           # push it to ECR so that it can
@@ -77,15 +77,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Login to ECR
-        env:
-          ECR_PASSWORD: ${{ secrets.ECR_AUTHORIZATION_TOKEN }}
-        run: docker login -u AWS --password-stdin ${{secrets.AWS_ECR_LOGIN_URI}}/ <<< $ECR_PASSWORD
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      
       
       - name: Pull latest images
         run: |
-         docker pull ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:1
-         
+         docker pull ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+            || { echo "Docker login failed: $?" && exit 1; }
       # - name: Stop and remove container if running
       #   run: |
       #    docker ps -q --filter "name=mlproj" | grep -q . && docker stop mlproj && docker rm -fv mlproj
